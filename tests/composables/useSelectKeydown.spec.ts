@@ -5,8 +5,8 @@ import { describe, it, expect } from 'vitest';
 describe('useSelectKeydown', () => {
     it('emits correct value on keydown', () => {
         const options = ref([{ text: '12', value: 12 }, { text: '23', value: 23 }]);
-        const emitted: any[] = [];
-        const emit = (_: string, value: number) => emitted.push(value); // <-- compatible with ...args: any[]
+        const emitted: (number | string)[] = [];
+        const emit = (_: string, value: number | string) => { emitted.push(value); };
 
         const { onSelectKeydown } = useSelectKeydown(options, emit);
 
@@ -21,8 +21,8 @@ describe('useSelectKeydown', () => {
             { text: 'January', value: 0 },
             { text: 'June', value: 5 },
         ]);
-        const emitted: any[] = [];
-        const emit = (_: string, value: number) => emitted.push(value);
+        const emitted: (number | string)[] = [];
+        const emit = (_: string, value: number | string) => { emitted.push(value); };
 
         const { onSelectKeydown } = useSelectKeydown(options, emit);
 
@@ -30,5 +30,19 @@ describe('useSelectKeydown', () => {
         expect(emitted).toEqual([0]);
         onSelectKeydown(new KeyboardEvent('keydown', { key: 'u' }));
         expect(emitted).toEqual([0, 5]);
+    });
+
+    it('skips options the predicate marks as disabled', () => {
+        const options = ref([
+            { text: 'January', value: 0 },
+            { text: 'June', value: 5 },
+        ]);
+        const emitted: (number | string)[] = [];
+        const emit = (_: string, value: number | string) => { emitted.push(value); };
+
+        const { onSelectKeydown } = useSelectKeydown(options, emit, (opt) => opt.value === 0);
+
+        onSelectKeydown(new KeyboardEvent('keydown', { key: 'j' }));
+        expect(emitted).toEqual([5]);
     });
 });

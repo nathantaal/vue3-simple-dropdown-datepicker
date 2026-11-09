@@ -2,16 +2,16 @@
   "name": "vue3-simple-dropdown-datepicker",
   "version": "1.0.0",
   "description": "Vue 3 datepicker with separate dropdowns for day, month and year.",
-  "main": "dist/index.cjs.js",
-  "module": "dist/index.esm.js",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "files": ["dist"],
   "sideEffects": ["**/*.css", "**/*.vue"],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.js"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
     },
     "./style.css": "./dist/style.css"
   },

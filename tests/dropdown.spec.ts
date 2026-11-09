@@ -1,6 +1,10 @@
 import { mount } from '@vue/test-utils';
 import Dropdown from '../src/dropdown.vue';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+
+afterEach(() => {
+    vi.useRealTimers();
+});
 
 describe('Dropdown.vue', () => {
     it('renders label and placeholder option', () => {
@@ -122,5 +126,24 @@ describe('Dropdown.vue', () => {
         });
         const placeholderOption = wrapper.findAll('option').find((o) => o.text() === 'Pick a month');
         expect(placeholderOption).toBeUndefined();
+    });
+
+    it('keeps an enabled placeholder when clearable and emits null for it', async () => {
+        const wrapper = mount(Dropdown, {
+            props: { simpleOptions: ['A', 'B'], placeholder: 'Pick one', clearable: true, modelValue: 'A' },
+        });
+        const placeholderOption = wrapper.findAll('option').find((o) => o.text() === 'Pick one');
+        expect(placeholderOption?.attributes('disabled')).toBeUndefined();
+        await wrapper.find('select').setValue('');
+        expect(wrapper.emitted('update:modelValue')).toEqual([[null]]);
+    });
+
+    it('cancels the type-ahead timer on unmount', async () => {
+        vi.useFakeTimers();
+        const wrapper = mount(Dropdown, { props: { simpleOptions: ['A', 'B'] } });
+        await wrapper.find('select').trigger('keydown', { key: 'a' });
+        expect(vi.getTimerCount()).toBe(1);
+        wrapper.unmount();
+        expect(vi.getTimerCount()).toBe(0);
     });
 });

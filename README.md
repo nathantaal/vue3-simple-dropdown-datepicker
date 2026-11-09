@@ -33,13 +33,12 @@ Then in a template:
 
 ```vue
 <simple-dropdown-datepicker
-  v-model="date"
-  :min="new Date(1900, 0, 1)"
-  :max="new Date()"
-  day-label="Day"
-  month-label="Month"
-  year-label="Year"
-/>
+    v-model="date"
+    :min="new Date(1900, 0, 1)"
+    :max="new Date()"
+    day-label="Day"
+    month-label="Month"
+    year-label="Year"></simple-dropdown-datepicker>
 ```
 
 ## Props
@@ -47,24 +46,48 @@ Then in a template:
 | Prop               | Type            | Default                 | Description                                          |
 | ------------------ | --------------- | ----------------------- | ---------------------------------------------------- |
 | `modelValue`       | `Date \| null`  | `null`                  | Controlled value (use with `v-model`).               |
-| `dateFormat`       | `string`        | `"yyyymmdd"`            | Order of dropdowns. Tokens: `dd`, `mm`, `yyyy`.      |
-| `dayPlaceholder`   | `string`        | today's day             | Placeholder shown in the day dropdown.               |
-| `monthPlaceholder` | `string`        | today's month           | Placeholder shown in the month dropdown.             |
-| `yearPlaceholder`  | `string`        | current year            | Placeholder shown in the year dropdown.              |
+| `dateFormat`       | `string`        | `"yyyymmdd"`            | Order of dropdowns. Use each of `dd`, `mm`, `yyyy` exactly once (case-insensitive); anything else warns and falls back to the default. |
+| `locale`           | `string`        | `"en"`                  | BCP 47 tag (e.g. `"nl"`, `"de-CH"`) for month names and the dropdowns' accessible names. Invalid tags warn and fall back to `"en"`. |
+| `dayPlaceholder`   | `string`        | "Day" in `locale`       | Placeholder shown in the day dropdown.               |
+| `monthPlaceholder` | `string`        | "Month" in `locale`     | Placeholder shown in the month dropdown.             |
+| `yearPlaceholder`  | `string`        | "Year" in `locale`      | Placeholder shown in the year dropdown.              |
 | `dayLabel`         | `string`        | `""`                    | Visible `<label>` for the day dropdown.              |
 | `monthLabel`       | `string`        | `""`                    | Visible `<label>` for the month dropdown.            |
 | `yearLabel`        | `string`        | `""`                    | Visible `<label>` for the year dropdown.             |
-| `minYear`          | `number`        | `1970`                  | Earliest year offered.                               |
-| `maxYear`          | `number`        | `2069`                  | Latest year offered.                                 |
-| `min`              | `Date \| null`  | `null`                  | Earliest selectable date (out-of-range disabled).    |
-| `max`              | `Date \| null`  | `null`                  | Latest selectable date (out-of-range disabled).      |
+| `clearable`        | `boolean`       | `false`                 | Keep each placeholder as a selectable option, so the user can empty a field again (emits `null`). |
+| `minYear`          | `number`        | year of `min`, else `1970` | Earliest year offered.                            |
+| `maxYear`          | `number`        | year of `max`, else `2069` | Latest year offered.                              |
+| `min`              | `Date \| null`  | `null`                  | Earliest selectable date. Earlier options are disabled; a selection that still ends up before `min` emits `null`. |
+| `max`              | `Date \| null`  | `null`                  | Latest selectable date. Later options are disabled; a selection that still ends up after `max` emits `null`. |
 
 ## Events
 
 | Event               | Payload         | Description                                    |
 | ------------------- | --------------- | ---------------------------------------------- |
-| `update:modelValue` | `Date \| null`  | Used by `v-model`. Emitted when value changes. |
+| `update:modelValue` | `Date \| null`  | Used by `v-model`. Emitted when the user changes the date, or when changing `min`/`max` makes the selection valid or invalid; `null` while the selection is outside `min`/`max`. Values set by the parent are not echoed back. |
 | `changeDate`        | `Date \| null`  | Same payload as `update:modelValue` (legacy).  |
+
+## Methods
+
+| Method    | Description                                                                 |
+| --------- | --------------------------------------------------------------------------- |
+| `clear()` | Empties all three dropdowns and emits `null` (if the value wasn't `null` already). Call it through a template ref. |
+
+```vue
+<simple-dropdown-datepicker ref="picker" v-model="date" />
+<button @click="picker.clear()">Reset</button>
+```
+
+## Accessibility
+
+Each dropdown without a visible label (`dayLabel` etc.) gets an `aria-label`
+with the localized field name ("day", "month", "year" — or "dag", "maand",
+"jaar" for `locale="nl"`). The dropdowns are wrapped in `role="group"`, so
+you can name the picker as a whole:
+
+```vue
+<simple-dropdown-datepicker v-model="birthday" locale="nl" aria-label="Geboortedatum" />
+```
 
 ## CSS
 

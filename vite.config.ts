@@ -10,7 +10,8 @@ export default defineConfig({
       entry: 'src/index.ts',
       name: 'DateDropdown',
       formats: ['es', 'cjs'],
-      fileName: (format) => (format === 'es' ? 'index.esm.js' : 'index.cjs.js'),
+      // Explicit extensions so Node picks the right module system without "type": "module".
+      fileName: (format) => (format === 'es' ? 'index.mjs' : 'index.cjs'),
     },
     rollupOptions: {
       external: ['vue'],

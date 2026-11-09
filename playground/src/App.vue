@@ -13,7 +13,7 @@
         <h2>1. Default usage</h2>
         <p>
           Just drop the component on your page and it works. The placeholders
-          will show today's date parts so the user knows what format is expected.
+          name each field (Year, Month, Day) in grey until a value is picked.
         </p>
         <simple-dropdown-datepicker />
       </section>
@@ -163,20 +163,39 @@
         </p>
       </section>
 
+      <!-- 10. Locale -->
+      <section class="example">
+        <h2>10. Locale</h2>
+        <p>
+          Pass a <code>locale</code> to translate the month names. The same
+          locale names the dropdowns for screen readers ("dag", "maand",
+          "jaar"), and an <code>aria-label</code> on the component names the
+          picker as a whole.
+        </p>
+        <simple-dropdown-datepicker
+          locale="nl"
+          date-format="ddmmyyyy"
+          day-placeholder="dag"
+          month-placeholder="maand"
+          year-placeholder="jaar"
+          aria-label="Geboortedatum"
+        />
+      </section>
+
     </main>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
 
 const now = new Date()
 
 // used by example 3
-const selectedDate = ref(null)
+const selectedDate = ref<Date | null>(null)
 
 // used by example 4 — pre-setted to King's Day 2025
-const prefilled = ref(new Date(2025, 3, 26))
+const prefilled = ref<Date | null>(new Date(2025, 3, 26))
 
 // used by example 6
 const currentYear = now.getFullYear()
@@ -186,7 +205,7 @@ const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
 const lastOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
 
 // used by example 9
-const lastEvent = ref(null)
+const lastEvent = ref<string | null>(null)
 
 // used by example 8 — min/max sits inside the minYear/maxYear window
 const combinedMin = new Date(2021, 2, 1)   // 1 March 2021
@@ -202,13 +221,15 @@ const formattedDate = computed(() => {
   })
 })
 
-function onChangeDate(date) {
+function onChangeDate(date: Date | null) {
   if (!date) {
     lastEvent.value = null
     return
   }
-  // toISOString gives us a nice string to show in the UI
-  lastEvent.value = date.toISOString().slice(0, 10)
+  // Build yyyy-mm-dd from local parts; toISOString() is UTC and would show
+  // the previous day east of Greenwich (the picker emits local midnight).
+  const pad = (n: number) => String(n).padStart(2, '0')
+  lastEvent.value = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
 }
 </script>
 
